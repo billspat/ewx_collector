@@ -53,3 +53,10 @@ def test_previous_fifteen_minute_period():
     pfmp = time_intervals.previous_fifteen_minute_period(sample_dt)
     assert pfmp[1] == datetime.datetime(2022,1,1,hour=2, minute=0, second=0)
     assert pfmp[0] == datetime.datetime(2022,1,1,hour=1, minute=45, second=0)
+
+def test_previous_fourteen_minute_period():
+
+    pfmp = time_intervals.previous_fourteen_minute_period()
+        # check that the interval is really 14 minutes
+    assert len(pfmp) == 2
+    assert (pfmp[1] - pfmp[0]).seconds == 14 * 60
