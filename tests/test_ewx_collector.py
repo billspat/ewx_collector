@@ -7,11 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-# this is in a sample test and may be removed
-import bs4
-
-
 from ewx_collector import ewx_collector
+
 
 @pytest.fixture
 def random_string():
@@ -21,10 +18,12 @@ def random_string():
     letters = string.ascii_lowercase
     return(''.join(random.choice(letters) for i in range(length)))
 
+
 @pytest.fixture
 def sample_stations():
     stations = ewx_collector.stations_from_env()
     return(stations)
+
 
 @pytest.fixture
 def sample_fixture_response():
@@ -67,12 +66,3 @@ def test_get_reading(sample_stations):
     
     assert reading_fields == expected_column_list
     
-    
-    
-
-    
-def test_content(sample_fixture_response):
-    """Sample pytest test function with the pytest fixture as an argument."""
-    from bs4 import BeautifulSoup
-    assert 'GitHub' in BeautifulSoup(sample_fixture_response.content).title.string
-
