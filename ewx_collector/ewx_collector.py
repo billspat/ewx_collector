@@ -3,9 +3,11 @@
 
 import json, os
 from datetime import datetime
-import multiweatherapi
+from multiweatherapi import multiweatherapi
 from dotenv import load_dotenv
-from time_intervals import previous_fifteen_minute_period
+
+from .time_intervals import previous_fifteen_minute_period
+
 load_dotenv()
 
 def sample_reading():
@@ -103,7 +105,7 @@ def stations_from_env():
         stations[station_name] = {
             "station_id" : f"{station_name}_1",
             "station_type" : station_name,
-            "station_config" : os.environ[station_name]
+            "station_config" : json.loads(os.environ[station_name])
         }
         
     return(stations)
