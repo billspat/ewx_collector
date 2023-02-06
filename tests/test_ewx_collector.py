@@ -50,8 +50,24 @@ def test_get_reading(sample_stations):
                           start_datetime_str = None, 
                           end_datetime_str = None)
     
-    assert not reading is None
-    assert isinstance(reading, dict)
+    assert reading is not None
+    assert isinstance(reading.resp_raw, dict)
+    assert len(reading.resp_raw) > 0 
+    
+    assert isinstance(reading.resp_transformed, list)
+    assert len(reading.resp_transformed) > 0 
+    assert isinstance(reading.resp_transformed[0], dict)
+    
+    assert isinstance(reading.resp_transformed[0], dict)
+    
+    # check that we got the keys we expect.  As the weather api grows this list will need to be updated
+    # or built into the class/package
+    expected_column_list = ['station_id', 'request_datetime', 'data_datetime', 'atemp', 'pcpn', 'relh']
+    reading_fields = list(reading.resp_transformed[0].keys())
+    
+    assert reading_fields == expected_column_list
+    
+    
     
 
     
@@ -60,14 +76,3 @@ def test_content(sample_fixture_response):
     from bs4 import BeautifulSoup
     assert 'GitHub' in BeautifulSoup(sample_fixture_response.content).title.string
 
-
-# def test_get_reading(random_string):
-#     """test the main (stub) function in this package
-
-#     :param random_string: string, pytest fixture
-#     :type random_string: string
-#     """
-
-#     reading_data = ewx_collector.get_reading(station_id=random_string)
-#     assert len(reading_data) > 0
-#     assert isinstance(reading_data, str)
