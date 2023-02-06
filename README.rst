@@ -15,8 +15,10 @@ ewx_collector
 
 
 
+This is a python package for use only with the MSU Enviroweather data collection system for Personal Weather stations. 
 
-Functions to manage scheduled and structure data acquisition from personal weather station APIs for database storage, 
+It includes methods to manage scheduled and structure data acquisition from commerical weather station 
+APIs for database storage, 
 based on https://github.com/billspat/multiweatherapi
 
 Status
