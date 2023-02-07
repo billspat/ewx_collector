@@ -1,7 +1,7 @@
 """Main module."""
 
 
-import json, os
+import json, os,csv, warnings
 from datetime import datetime
 from multiweatherapi import multiweatherapi
 from dotenv import load_dotenv
@@ -9,31 +9,6 @@ from dotenv import load_dotenv
 from .time_intervals import previous_fifteen_minute_period
 
 load_dotenv()
-
-def sample_reading():
-    
-    sample_reading = [
-        {
-            "station_id": "200000000500",
-            "request_datetime": "2022-07-14 23:59:43",
-            "data_datetime": "2022-07-14 22:00:00",
-            "atemp": 18.6,
-            "pcpn": 0.0,
-            "relh": "71"
-        }, 
-        {
-        "station_id": "200000000500",
-        "request_datetime": "2022-07-14 23:59:43",
-        "data_datetime": "2022-07-14 22:15:00",
-        "atemp": 17.9,
-        "pcpn": 0.0,
-        "relh": "76"
-        }
-    ]
-    
-    return(json.dumps(sample_reading))
-
-
 
 def get_reading(station_type, station_config,
                 start_datetime_str = None,
@@ -73,7 +48,6 @@ def get_readings(stations:dict,
     
     station: dictionary keyed on station_id, station_type and config
     
-    
     """
     
     readings = {}
@@ -103,9 +77,36 @@ def stations_from_env():
     stations = {}
     for station_name in stations_available:
         stations[station_name] = {
-            "station_id" : f"{station_name}_1",
-            "station_type" : station_name,
+            "station_id"     : f"{station_name}_1",
+            "station_type"   : station_name,
             "station_config" : json.loads(os.environ[station_name])
         }
         
-    return(stations)
+    return stations
+
+
+def stations_from_file(csv_file_path:str):
+    """ given a csv file of stations, read them into standard format
+    returns a dictionary of dictionaries, keyed on 'station ID'
+    
+    """
+    station_field_names = ["station_id", "station_type", "station_config"]
+    
+    if not os.path.exists(csv_file_path): 
+        warnings.warn(f"file not found {csv_file_path}")
+        return None
+    
+    stations = {}
+    with open(csv_file_path, "r") as csvfile:
+        csvreader = csv.DictReader(csvfile,  fieldnames = station_field_names, delimiter=",", quotechar="'") # 
+        header = next(csvreader)
+        for row in csvreader:
+            stations[row['station_id']] = row
+    
+    return stations    
+
+## random python notes 
+# to convert the dictionary of stations into a simple list
+# station_list = [s for s in stations.values()]
+#  to get the first row in the dict of dict (for testing )
+# sd = stations[list(stations.keys())[0]]
