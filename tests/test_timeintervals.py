@@ -40,7 +40,11 @@ def test_previous_fifteen_minute_period():
     assert pfmp[1] > pfmp[0]
     assert pfmp[0].minute % 15 == 0
     assert pfmp[1].minute % 15 == 0
-    assert  abs(pfmp[1].minute - pfmp[0].minute) == 15
+    start_minute = pfmp[0].minute
+    end_minute = pfmp[1].minute
+    # if the end minute is at top of clock, call it 60 minutes instead of 0
+    if end_minute == 0: end_minute = 60
+    assert  abs(end_minute - start_minute) == 15
 
     now = datetime.datetime.now(datetime.timezone.utc)
     pfmp = time_intervals.previous_fifteen_minute_period(now)
