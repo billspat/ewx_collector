@@ -2,7 +2,8 @@
 
 """Tests for `ewx_collector` package."""
 
-import pytest, random, string, os
+import pytest, random, string,  os
+from tempfile import NamedTemporaryFile
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -34,7 +35,35 @@ def sample_fixture_response():
     import requests
     return requests.get('https://github.com/')
 
+@pytest.fixture
+def fake_stations_list():
+    """this is fake data and won't connect to any real station API.  The API keys look real but are made up"""
+    
+    return [
+        ['fake_zentra','ZENTRA','{"sn":"z1-1234","token":"d5b8f6391ac38bad6f0b51d7a718b9e3e31eec81","tz":"ET"}'],
+        ['fake_davis','DAVIS','{"sn":"123456","apikey":"gtqdcbirudd1sarq6esbvorfj6tw67ao","apisec":"0286g8zxfvr77yhdx3pcwnnqqstdwqel","tz":"ET"}'],
+        ['fake_spectrum','SPECTRUM','{"sn":"12345678","apikey":"c3a2f80786398e656b08677b7a511a59","tz":"ET"}']
+    ]
+    
+@pytest.fixture
+def fake_stations_file(fake_stations_list):
 
+    header = ['station_id', 'station_type', 'config']
+
+    csv_file = NamedTemporaryFile(mode = 'w+', suffix='.csv', delete=False)
+    csv_file_path = csv_file.name
+    w = csv.writer(csv_file, delimiter=',', quotechar="'") 
+    
+    w.writerow(header)
+    w.writerows(fake_stations_list)
+    
+    csv_file.close()
+    
+    yield(csv_file_path)
+    
+    os.remove(csv_file_path)
+
+    return 
 
 def test_stations_from_env():
     stations = ewx_collector.stations_from_env()
@@ -65,4 +94,23 @@ def test_get_reading(sample_stations):
     reading_fields = list(reading.resp_transformed[0].keys())
     
     assert reading_fields == expected_column_list
+   
+import csv
+
+def test_fake_stations_file(fake_stations_file):
+    """test of that the fixture works to create a file"""
+    with open(fake_stations_file, "r") as csvfile:
+        csvreader = csv.DictReader(csvfile, quotechar="'")
+        for row in csvreader:
+            assert isinstance(row, dict)
+
+def test_stations_from_file(fake_stations_file):
+    stations = ewx_collector.stations_from_file(fake_stations_file)
     
+    # TODO move this fixture
+    station_fields = ['station_id', 'station_type', 'station_config']
+    assert isinstance(stations, dict)
+    for station in stations:
+        assert isinstance(stations[station], dict)
+        assert station_fields == list(stations[station].keys())
+
