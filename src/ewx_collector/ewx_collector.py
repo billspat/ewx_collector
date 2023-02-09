@@ -2,11 +2,12 @@
 
 
 import json, os,csv, warnings
-from datetime import datetime
+from datetime import datetime, timedelta
 from multiweatherapi import multiweatherapi
 from dotenv import load_dotenv
 
-from .time_intervals import previous_fifteen_minute_period
+
+from time_intervals import previous_fifteen_minute_period
 
 load_dotenv()
 
@@ -43,7 +44,8 @@ def get_reading(station_type, station_config,
 
 def get_readings(stations:dict,
                 start_datetime_str:str = None,
-                end_datetime_str:str = None):
+                end_datetime_str:str = None,
+                transformed_only = True):
     """get readings from a list of stations
     
     station: dictionary keyed on station_id, station_type and config
@@ -51,21 +53,24 @@ def get_readings(stations:dict,
     """
     
     readings = {}
-    for station in stations:
+    for station_id in stations:
+        station = stations[station_id]
         mwapi_resp = get_reading(
                     station_type = station['station_type'], 
                     station_config = station['station_config'],
                     start_datetime_str = start_datetime_str,
                     end_datetime_str = end_datetime_str)
 
-        readings[station['station_id']] =  { 
-             'station_id' : station['station_id'], 'station_type' : station['station_type'],
-             'start': start_datetime_str,
-             'end':end_datetime_str,
-             'json' : mwapi_resp.resp_raw,
-             'data' :  mwapi_resp.resp_transformed
-        }
-            
+        # readings[station_id] =  { 
+        #      'station_id' : station['station_id'], 'station_type' : station['station_type'],
+        #      'start': start_datetime_str,
+        #      'end':end_datetime_str,
+        #      'json' : mwapi_resp.resp_raw,
+        #      'data' :  mwapi_resp.resp_transformed
+        # }
+        readings[station_id] = mwapi_resp.resp_transformed
+        # need to return just a single array of dict here
+     
     return(readings)
 
     
@@ -101,7 +106,11 @@ def stations_from_file(csv_file_path:str):
         csvreader = csv.DictReader(csvfile,  fieldnames = station_field_names, delimiter=",", quotechar="'") # 
         header = next(csvreader)
         for row in csvreader:
-            stations[row['station_id']] = row
+            station_id = row['station_id']
+            # try
+            print(row['station_config'] )
+            row['station_config'] = json.loads(row['station_config'])
+            stations[station_id] = row
     
     return stations    
 

@@ -5,6 +5,6 @@ __email__ = 'billspat@msu.edu'
 __version__ = '0.1.0'
 
 from . import ewx_collector
-from .time_intervals import previous_fifteen_minute_period, previous_fourteen_minute_period
+from . import time_intervals
 
 
